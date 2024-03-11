@@ -1,0 +1,35 @@
+import math
+
+def reward_function(params):
+    waypoints = params['waypoints']
+    closest_waypoints = params['closest_waypoints']
+    heading = params['heading']
+    speed = params['speed']
+    distance_from_center = params['distance_from_center']
+
+    next_point = waypoints[closest_waypoints[1]]
+    prev_point = waypoints[closest_waypoints[0]]
+
+    # Calcula a direção da linha central em graus
+    track_direction = math.degrees(math.atan2(next_point[1] - prev_point[1], next_point[0] - prev_point[0]))
+
+    # Calcula a diferença entre a direção da pista e a direção do carro
+    direction_diff = abs(track_direction - heading)
+    direction_diff = min(direction_diff, 360 - direction_diff)
+
+    # Penaliza a recompensa se a diferença for muito grande
+    DIRECTION_THRESHOLD = 10.0
+    direction_reward = 1.0 if direction_diff <= DIRECTION_THRESHOLD else 0.5
+
+    # Recompensa por manter uma velocidade alta
+    SPEED_THRESHOLD = 2.0
+    speed_reward = 1.0 if speed >= SPEED_THRESHOLD else 0.5
+
+    # Penaliza a recompensa se o carro estiver muito próximo à borda da pista
+    CENTER_THRESHOLD = 0.4
+    center_reward = 1.0 if distance_from_center <= CENTER_THRESHOLD else 0.5
+
+    # Combina as recompensas
+    reward = direction_reward * speed_reward * center_reward
+
+    return float(reward)
